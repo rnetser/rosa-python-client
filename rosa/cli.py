@@ -77,9 +77,9 @@ def parse_json_response(response: str) -> list or json:
         return response.splitlines()
 
 
-def execute(user_command, allowed_commands=None):
+def execute(command, allowed_commands=None):
     allowed_commands = allowed_commands or parse_help()
-    _user_command = shlex.split(user_command)
+    _user_command = shlex.split(command)
     command = ["rosa"]
     command.extend(_user_command)
     json_output = None
