@@ -54,9 +54,7 @@ def parse_help(rosa_cmd="rosa"):
         _commands = get_available_commands(command=[rosa_cmd, top_command])
         for command in _commands:
             commands_dict[top_command][command] = {}
-            _commands = get_available_commands(
-                command=[rosa_cmd, top_command, command]
-            )
+            _commands = get_available_commands(command=[rosa_cmd, top_command, command])
             if _commands:
                 for _command in _commands:
                     commands_dict[top_command][command][_command] = {}
@@ -101,7 +99,6 @@ if __name__ == "__main__":
     cmd1 = main(allowed_commands=_available_commands, user_command=user_command1)
     cmd2 = main(allowed_commands=_available_commands, user_command=user_command2)
     cmd3 = main(allowed_commands=_available_commands, user_command=user_command3)
-
 
     print(cmd1)
     print(cmd2)
