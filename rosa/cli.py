@@ -87,20 +87,16 @@ def execute(command, allowed_commands=None):
     _user_command = shlex.split(command)
     command = ["rosa"]
     command.extend(_user_command)
-    json_output = None
+    json_output = {}
     for cmd in command[1:]:
         if cmd.startswith("--"):
             continue
 
-        json_output = (
-            allowed_commands.get(cmd) if not json_output else json_output.get(cmd)
-        )
-        if json_output is True:
+        json_output = allowed_commands.get(cmd, json_output.get(cmd))
+        if json_output.get("json_output") is True:
+            command.append("-ojson")
             break
 
-    if json_output:
-        command.append("-ojson")
-
-    LOGGER.info(f"Executing command: {command}")
+    LOGGER.info(f"Executing command: {' '.join(command)}")
     res = subprocess.run(command, capture_output=True, check=True, text=True)
     return parse_json_response(response=res.stdout)
