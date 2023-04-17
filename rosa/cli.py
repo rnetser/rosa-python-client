@@ -3,6 +3,11 @@ import re
 import shlex
 import subprocess
 
+from simple_logger.logger import get_logger
+
+
+LOGGER = get_logger(__name__)
+
 
 def output_in_flags(command):
     available_flags = get_available_flags(command=command)
@@ -96,5 +101,6 @@ def execute(command, allowed_commands=None):
     if json_output:
         command.append("-ojson")
 
+    LOGGER.info(f"Executing command: {command}")
     res = subprocess.run(command, capture_output=True, check=True, text=True)
     return parse_json_response(response=res.stdout)

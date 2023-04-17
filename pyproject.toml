@@ -8,6 +8,7 @@ packages = [{include = "rosa"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+python-simple-logger = "*"
 
 
 [build-system]
