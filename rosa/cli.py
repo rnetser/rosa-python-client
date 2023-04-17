@@ -1,5 +1,6 @@
 import json
 import re
+import shlex
 import subprocess
 
 
@@ -78,7 +79,7 @@ def parse_json_response(response: str) -> list or json:
 
 def execute(user_command, allowed_commands=None):
     allowed_commands = allowed_commands or parse_help()
-    _user_command = user_command.split(" ")
+    _user_command = shlex.split(user_command)
     command = ["rosa"]
     command.extend(_user_command)
     json_output = None
