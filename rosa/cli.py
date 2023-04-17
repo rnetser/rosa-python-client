@@ -84,8 +84,13 @@ def execute(command, allowed_commands=None):
     command.extend(_user_command)
     json_output = None
     for cmd in command[1:]:
-        json_output = allowed_commands[cmd] if not json_output else json_output.get(cmd)
-        if json_output:
+        if cmd.startswith("--"):
+            continue
+
+        json_output = (
+            allowed_commands.get(cmd) if not json_output else json_output.get(cmd)
+        )
+        if json_output is True:
             break
 
     if json_output:
