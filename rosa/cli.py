@@ -93,7 +93,7 @@ def execute(command, allowed_commands=None):
             continue
 
         json_output = allowed_commands.get(cmd, json_output.get(cmd))
-        if json_output.get("json_output") is True:
+        if isinstance(json_output, dict) and json_output.get("json_output") is True:
             command.append("-ojson")
             break
 
