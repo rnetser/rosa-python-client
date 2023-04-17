@@ -75,7 +75,7 @@ def parse_help(rosa_cmd="rosa"):
     return commands_dict
 
 
-def parse_json_response(response: str) -> list or json:
+def parse_json_response(response):
     try:
         return json.loads(response)
     except json.decoder.JSONDecodeError:
