@@ -76,7 +76,8 @@ def parse_json_response(response: str) -> list or json:
         return response.splitlines()
 
 
-def main(allowed_commands, user_command: str) -> subprocess.CompletedProcess:
+def execute(user_command, allowed_commands=None):
+    allowed_commands = allowed_commands or parse_help()
     _user_command = user_command.split(" ")
     command = ["rosa"]
     command.extend(_user_command)
@@ -89,17 +90,3 @@ def main(allowed_commands, user_command: str) -> subprocess.CompletedProcess:
 
     res = subprocess.run(command, capture_output=True, check=True, text=True)
     return parse_json_response(response=res.stdout)
-
-
-if __name__ == "__main__":
-    _available_commands = parse_help()
-    user_command1 = "version"
-    user_command2 = "list clusters"
-    user_command3 = "whoami"
-    cmd1 = main(allowed_commands=_available_commands, user_command=user_command1)
-    cmd2 = main(allowed_commands=_available_commands, user_command=user_command2)
-    cmd3 = main(allowed_commands=_available_commands, user_command=user_command3)
-
-    print(cmd1)
-    print(cmd2)
-    print(cmd3)

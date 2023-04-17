@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "Wrapper for rosa cli"
 authors = ["Meni Yakove <myakove@gmail.com>"]
 readme = "README.md"
-packages = [{include = "cli"}]
+packages = [{include = "rosa"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
