@@ -9,10 +9,10 @@ from simple_logger.logger import get_logger
 LOGGER = get_logger(__name__)
 
 
-def output_in_flags(command):
-    available_flags = get_available_flags(command=command)
+def check_flag_in_flags(command_list, flag_str):
+    available_flags = get_available_flags(command=command_list)
     for flag in available_flags:
-        if "-o, --output" in flag:
+        if flag_str in flag:
             return True
     return False
 
@@ -41,10 +41,10 @@ def get_available_flags(command):
         command, capture_output=True, check=True, text=True
     )
     available_flags = re.findall(
-        r"Flags:(.*)Global Flags:", available_flags.stdout, re.DOTALL
+        r"Flags:(.*)Global Flags:(.*)", available_flags.stdout, re.DOTALL
     )
     if available_flags:
-        available_flags = available_flags[0]
+        available_flags = " ".join([flags for flags in available_flags[0]])
         available_flags = available_flags.strip()
         return available_flags.splitlines()
     return []
@@ -53,6 +53,9 @@ def get_available_flags(command):
 def parse_help(rosa_cmd="rosa"):
     commands_dict = {}
     _commands = get_available_commands(command=[rosa_cmd])
+    output_flag_str = "-o, --output"
+    auto_answer_yes_str = "-y, --yes"
+
     for command in _commands:
         commands_dict.setdefault(command, {})
 
@@ -66,10 +69,28 @@ def parse_help(rosa_cmd="rosa"):
                     commands_dict[top_command][command][_command] = {}
                     commands_dict[top_command][command][_command][
                         "json_output"
-                    ] = output_in_flags([rosa_cmd, top_command, _command])
+                    ] = check_flag_in_flags(
+                        command_list=[rosa_cmd, top_command, _command],
+                        flag_str=output_flag_str,
+                    )
+                    commands_dict[top_command][command][_command][
+                        "auto_answer_yes"
+                    ] = check_flag_in_flags(
+                        command_list=[rosa_cmd, top_command, _command],
+                        flag_str=auto_answer_yes_str,
+                    )
             else:
-                commands_dict[top_command][command]["json_output"] = output_in_flags(
-                    [rosa_cmd, top_command, command]
+                commands_dict[top_command][command][
+                    "json_output"
+                ] = check_flag_in_flags(
+                    command_list=[rosa_cmd, top_command, command],
+                    flag_str=output_flag_str,
+                )
+                commands_dict[top_command][command][
+                    "auto_answer_yes"
+                ] = check_flag_in_flags(
+                    command_list=[rosa_cmd, top_command, command],
+                    flag_str=auto_answer_yes_str,
                 )
 
     return commands_dict
@@ -88,13 +109,22 @@ def execute(command, allowed_commands=None):
     command = ["rosa"]
     command.extend(_user_command)
     json_output = {}
+    auto_answer_yes = {}
     for cmd in command[1:]:
         if cmd.startswith("--"):
             continue
 
         json_output = allowed_commands.get(cmd, json_output.get(cmd, {}))
-        if json_output.get("json_output") is True:
+        add_json_output = json_output.get("json_output") is True
+        if add_json_output:
             command.append("-ojson")
+
+        auto_answer_yes = allowed_commands.get(cmd, auto_answer_yes.get(cmd, {}))
+        add_auto_answer_yes = json_output.get("auto_answer_yes") is True
+        if add_auto_answer_yes:
+            command.append("--yes")
+
+        if add_json_output or add_auto_answer_yes:
             break
 
     LOGGER.info(f"Executing command: {' '.join(command)}")
