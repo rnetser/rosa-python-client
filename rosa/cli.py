@@ -139,7 +139,7 @@ def execute(command, allowed_commands=None):
         auto_update = allowed_commands.get(cmd, auto_update.get(cmd, {}))
         add_auto_update = auto_update.get("auto_mode") is True
         if add_auto_update:
-            command.append("--mode auto")
+            command.append("--mode=auto")
 
         if add_json_output or add_auto_answer_yes or add_auto_update:
             break
