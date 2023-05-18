@@ -55,6 +55,7 @@ def parse_help(rosa_cmd="rosa"):
     _commands = get_available_commands(command=[rosa_cmd])
     output_flag_str = "-o, --output"
     auto_answer_yes_str = "-y, --yes"
+    auto_mode_str = "-m, --mode"
 
     for command in _commands:
         commands_dict.setdefault(command, {})
@@ -79,6 +80,12 @@ def parse_help(rosa_cmd="rosa"):
                         command_list=[rosa_cmd, top_command, _command],
                         flag_str=auto_answer_yes_str,
                     )
+                    commands_dict[top_command][command][_command][
+                        "auto_mode"
+                    ] = check_flag_in_flags(
+                        command_list=[rosa_cmd, top_command, _command],
+                        flag_str=auto_mode_str,
+                    )
             else:
                 commands_dict[top_command][command][
                     "json_output"
@@ -91,6 +98,10 @@ def parse_help(rosa_cmd="rosa"):
                 ] = check_flag_in_flags(
                     command_list=[rosa_cmd, top_command, command],
                     flag_str=auto_answer_yes_str,
+                )
+                commands_dict[top_command][command]["auto_mode"] = check_flag_in_flags(
+                    command_list=[rosa_cmd, top_command, command],
+                    flag_str=auto_mode_str,
                 )
 
     return commands_dict
@@ -110,6 +121,7 @@ def execute(command, allowed_commands=None):
     command.extend(_user_command)
     json_output = {}
     auto_answer_yes = {}
+    auto_update = {}
     for cmd in command[1:]:
         if cmd.startswith("--"):
             continue
@@ -120,11 +132,16 @@ def execute(command, allowed_commands=None):
             command.append("-ojson")
 
         auto_answer_yes = allowed_commands.get(cmd, auto_answer_yes.get(cmd, {}))
-        add_auto_answer_yes = json_output.get("auto_answer_yes") is True
+        add_auto_answer_yes = auto_answer_yes.get("auto_answer_yes") is True
         if add_auto_answer_yes:
             command.append("--yes")
 
-        if add_json_output or add_auto_answer_yes:
+        auto_update = allowed_commands.get(cmd, auto_update.get(cmd, {}))
+        add_auto_update = auto_update.get("auto_mode") is True
+        if add_auto_update:
+            command.append("--mode auto")
+
+        if add_json_output or add_auto_answer_yes or add_auto_update:
             break
 
     LOGGER.info(f"Executing command: {' '.join(command)}")
