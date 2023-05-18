@@ -53,6 +53,9 @@ def get_available_flags(command):
 def parse_help(rosa_cmd="rosa"):
     commands_dict = {}
     _commands = get_available_commands(command=[rosa_cmd])
+    output_flag_str = "-o, --output"
+    auto_answer_yes_str = "-y, --yes"
+
     for command in _commands:
         commands_dict.setdefault(command, {})
 
@@ -68,25 +71,26 @@ def parse_help(rosa_cmd="rosa"):
                         "json_output"
                     ] = check_flag_in_flags(
                         command_list=[rosa_cmd, top_command, _command],
-                        flag_str="-o, --output",
+                        flag_str=output_flag_str,
                     )
                     commands_dict[top_command][command][_command][
                         "auto_answer_yes"
                     ] = check_flag_in_flags(
                         command_list=[rosa_cmd, top_command, _command],
-                        flag_str="-y, --yes",
+                        flag_str=auto_answer_yes_str,
                     )
             else:
                 commands_dict[top_command][command][
                     "json_output"
                 ] = check_flag_in_flags(
                     command_list=[rosa_cmd, top_command, command],
-                    flag_str="-o, --output",
+                    flag_str=output_flag_str,
                 )
                 commands_dict[top_command][command][
                     "auto_answer_yes"
                 ] = check_flag_in_flags(
-                    command_list=[rosa_cmd, top_command, command], flag_str="-y, --yes"
+                    command_list=[rosa_cmd, top_command, command],
+                    flag_str=auto_answer_yes_str,
                 )
 
     return commands_dict
