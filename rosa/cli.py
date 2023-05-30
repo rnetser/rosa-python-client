@@ -161,7 +161,9 @@ def execute(command, allowed_commands=None):
         if add_billing_model:
             command.append("--billing-model standard")
 
-        if any([add_json_output,add_auto_answer_yes,add_auto_update,add_billing_model]):
+        if any(
+            [add_json_output, add_auto_answer_yes, add_auto_update, add_billing_model]
+        ):
             break
 
     LOGGER.info(f"Executing command: {' '.join(command)}")
