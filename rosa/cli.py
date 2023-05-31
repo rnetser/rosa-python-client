@@ -127,7 +127,36 @@ def parse_json_response(response):
         return response.splitlines()
 
 
-def execute(command, allowed_commands=None):
+def execute(command, allowed_commands=None, billing_model_value="standard"):
+    """
+    Support commands and execute with rosa cli
+
+    Args:
+        command (str): Command to execute
+        allowed_commands (dict): Commands dict of dicts with following options
+            for each entry
+            Example: #TODO
+        billing_model_value (str): If needed, set the billing model to be used for some
+            operations. Default value is "standard".
+
+
+    Returns:
+        #TODO
+
+    Raise:
+        If billing model is invalid
+    """
+    billing_options = [
+        "marketplace",
+        "standard",
+        "marketplace-aws",
+        "marketplace-azure",
+        "marketplace-rhm",
+    ]
+    if billing_model_value not in billing_options:
+        raise LOGGER.error(
+            f"The billing model mentioned is not valid, must be one of the followings:\n{billing_options}"
+        )
     allowed_commands = allowed_commands or parse_help()
     _user_command = shlex.split(command)
     command = ["rosa"]
@@ -159,7 +188,7 @@ def execute(command, allowed_commands=None):
         billing_model = allowed_commands.get(cmd, billing_model.get(cmd, {}))
         add_billing_model = billing_model.get("billing_model") is True
         if add_billing_model:
-            command.append("--billing-model standard")
+            command.append(f"--billing-model {billing_model_value}")
 
         if any(
             [add_json_output, add_auto_answer_yes, add_auto_update, add_billing_model]
