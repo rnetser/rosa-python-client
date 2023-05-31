@@ -56,7 +56,6 @@ def parse_help(rosa_cmd="rosa"):
     output_flag_str = "-o, --output"
     auto_answer_yes_str = "-y, --yes"
     auto_mode_str = "-m, --mode"
-    billing_model_str = "--billing-model"
 
     for command in _commands:
         commands_dict.setdefault(command, {})
@@ -87,12 +86,6 @@ def parse_help(rosa_cmd="rosa"):
                         command_list=[rosa_cmd, top_command, _command],
                         flag_str=auto_mode_str,
                     )
-                    commands_dict[top_command][command][_command][
-                        "billing_model"
-                    ] = check_flag_in_flags(
-                        command_list=[rosa_cmd, top_command, _command],
-                        flag_str=billing_model_str,
-                    )
             else:
                 commands_dict[top_command][command][
                     "json_output"
@@ -110,12 +103,6 @@ def parse_help(rosa_cmd="rosa"):
                     command_list=[rosa_cmd, top_command, command],
                     flag_str=auto_mode_str,
                 )
-                commands_dict[top_command][command][
-                    "billing_model"
-                ] = check_flag_in_flags(
-                    command_list=[rosa_cmd, top_command, command],
-                    flag_str=billing_model_str,
-                )
 
     return commands_dict
 
@@ -127,10 +114,9 @@ def parse_json_response(response):
         return response.splitlines()
 
 
-def execute(command, allowed_commands=None, billing_model_value="standard"):
+def execute(command, allowed_commands=None):
     """
     Support commands and execute with ROSA cli
-
     Args:
         command (str): ROSA cli command to execute
         allowed_commands (dict): Commands dict of dicts with following
@@ -142,27 +128,10 @@ def execute(command, allowed_commands=None, billing_model_value="standard"):
                     'admin': {'json_output': True, 'auto_answer_yes': True, 'auto_mode': False, 'billing_model': False},
                     'cluster': {'json_output': True, 'auto_answer_yes': True, 'auto_mode': True, 'billing_model': False}
                     }}
-        billing_model_value (str): If needed, set the billing model to be used for some
-            operations. Default value is "standard".
-
 
     Returns:
         list or json: json if json.loads(res.stdout) not fail, else list of output after 'splitlines'.
-
-    Raise:
-        If billing model is invalid
     """
-    billing_options = [
-        "marketplace",
-        "standard",
-        "marketplace-aws",
-        "marketplace-azure",
-        "marketplace-rhm",
-    ]
-    if billing_model_value not in billing_options:
-        raise LOGGER.error(
-            f"The billing model mentioned is not valid, must be one of the followings:\n{billing_options}"
-        )
     allowed_commands = allowed_commands or parse_help()
     _user_command = shlex.split(command)
     command = ["rosa"]
@@ -170,7 +139,6 @@ def execute(command, allowed_commands=None, billing_model_value="standard"):
     json_output = {}
     auto_answer_yes = {}
     auto_update = {}
-    billing_model = {}
     for cmd in command[1:]:
         if cmd.startswith("--"):
             continue
@@ -190,15 +158,7 @@ def execute(command, allowed_commands=None, billing_model_value="standard"):
         if add_auto_update:
             command.append("--mode=auto")
 
-        # TODO remove support for billing-model flag once https://github.com/openshift/rosa/issues/1279 resolved
-        billing_model = allowed_commands.get(cmd, billing_model.get(cmd, {}))
-        add_billing_model = billing_model.get("billing_model") is True
-        if add_billing_model:
-            command.append(f"--billing-model {billing_model_value}")
-
-        if any(
-            [add_json_output, add_auto_answer_yes, add_auto_update, add_billing_model]
-        ):
+        if any([add_json_output, add_auto_answer_yes, add_auto_update]):
             break
 
     LOGGER.info(f"Executing command: {' '.join(command)}")
