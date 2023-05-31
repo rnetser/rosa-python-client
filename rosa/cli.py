@@ -117,6 +117,7 @@ def parse_json_response(response):
 def execute(command, allowed_commands=None):
     """
     Support commands and execute with ROSA cli
+
     Args:
         command (str): ROSA cli command to execute
         allowed_commands (dict): Commands dict of dicts with following
@@ -130,7 +131,8 @@ def execute(command, allowed_commands=None):
                     }}
 
     Returns:
-        list or json: json if json.loads(res.stdout) not fail, else list of output after 'splitlines'.
+        list or json: json if json.loads(res.stdout) not fail,
+        else list of output line by line.
     """
     allowed_commands = allowed_commands or parse_help()
     _user_command = shlex.split(command)
