@@ -129,19 +129,25 @@ def parse_json_response(response):
 
 def execute(command, allowed_commands=None, billing_model_value="standard"):
     """
-    Support commands and execute with rosa cli
+    Support commands and execute with ROSA cli
 
     Args:
-        command (str): Command to execute
-        allowed_commands (dict): Commands dict of dicts with following options
-            for each entry
-            Example: #TODO
+        command (str): ROSA cli command to execute
+        allowed_commands (dict): Commands dict of dicts with following
+            options for each entry
+            Example:
+                {'create':
+                    {'account-roles': {'json_output': False, 'auto_answer_yes': True,
+                        'auto_mode': True, 'billing_model': False},
+                    'admin': {'json_output': True, 'auto_answer_yes': True, 'auto_mode': False, 'billing_model': False},
+                    'cluster': {'json_output': True, 'auto_answer_yes': True, 'auto_mode': True, 'billing_model': False}
+                    }}
         billing_model_value (str): If needed, set the billing model to be used for some
             operations. Default value is "standard".
 
 
     Returns:
-        #TODO
+        list or json: json if json.loads(res.stdout) not fail, else list of output after 'splitlines'.
 
     Raise:
         If billing model is invalid
