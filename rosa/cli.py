@@ -115,6 +115,25 @@ def parse_json_response(response):
 
 
 def execute(command, allowed_commands=None):
+    """
+    Support commands and execute with ROSA cli
+
+    Args:
+        command (str): ROSA cli command to execute
+        allowed_commands (dict): Commands dict of dicts with following
+            options for each entry
+            Example:
+                {'create':
+                    {'account-roles': {'json_output': False, 'auto_answer_yes': True,
+                        'auto_mode': True, 'billing_model': False},
+                    'admin': {'json_output': True, 'auto_answer_yes': True, 'auto_mode': False, 'billing_model': False},
+                    'cluster': {'json_output': True, 'auto_answer_yes': True, 'auto_mode': True, 'billing_model': False}
+                    }}
+
+    Returns:
+        list or json: json if json.loads(res.stdout) not fail,
+        else list of output line by line.
+    """
     allowed_commands = allowed_commands or parse_help()
     _user_command = shlex.split(command)
     command = ["rosa"]
@@ -141,7 +160,7 @@ def execute(command, allowed_commands=None):
         if add_auto_update:
             command.append("--mode=auto")
 
-        if add_json_output or add_auto_answer_yes or add_auto_update:
+        if any([add_json_output, add_auto_answer_yes, add_auto_update]):
             break
 
     LOGGER.info(f"Executing command: {' '.join(command)}")
