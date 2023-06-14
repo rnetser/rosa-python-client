@@ -41,7 +41,7 @@ def change_home_environment():
 def is_logged_in(aws_region, allowed_commands):
     try:
         res = build_execute_command(
-            command=f"whoami", aws_region=aws_region, allowed_commands=allowed_commands
+            command="whoami", aws_region=aws_region, allowed_commands=allowed_commands
         )
         return "User is not logged in to OCM" not in res["err"]
     except CommandExecuteError:
@@ -183,8 +183,8 @@ def parse_help(rosa_cmd="rosa"):
                     commands_dict[top_command][command][_command][
                         "region"
                     ] = check_flag_in_flags(
-                            command_list=[rosa_cmd, top_command, _command],
-                            flag_str=region_str,
+                        command_list=[rosa_cmd, top_command, _command],
+                        flag_str=region_str,
                     )
             else:
                 commands_dict[top_command][command][
@@ -203,11 +203,9 @@ def parse_help(rosa_cmd="rosa"):
                     command_list=[rosa_cmd, top_command, command],
                     flag_str=auto_mode_str,
                 )
-                commands_dict[top_command][command][
-                    "region"
-                ] = check_flag_in_flags(
-                        command_list=[rosa_cmd, top_command, command],
-                        flag_str=region_str,
+                commands_dict[top_command][command]["region"] = check_flag_in_flags(
+                    command_list=[rosa_cmd, top_command, command],
+                    flag_str=region_str,
                 )
 
     return commands_dict
