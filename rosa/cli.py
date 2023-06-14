@@ -21,13 +21,14 @@ class NotLoggedInError(Exception):
 
 
 @contextlib.contextmanager
-def rosa_login_logout(env, token, aws_region, allowed_commands):
+def rosa_login_logout(env, token, aws_region, allowed_commands=None):
+    _allowed_commands = allowed_commands or parse_help()
     build_execute_command(
         command=f"login --region {aws_region} {f'--env={env}' if env else ''} --token={token}",
-        allowed_commands=allowed_commands,
+        allowed_commands=_allowed_commands,
     )
     yield
-    build_execute_command(command="logout", allowed_commands=allowed_commands)
+    build_execute_command(command="logout", allowed_commands=_allowed_commands)
 
 
 @contextlib.contextmanager
@@ -38,10 +39,11 @@ def change_home_environment():
     os.environ["HOME"] = current_home
 
 
-def is_logged_in(aws_region, allowed_commands):
+def is_logged_in(aws_region=None, allowed_commands=None):
+    _allowed_commands = allowed_commands or parse_help()
     try:
         res = build_execute_command(
-            command="whoami", aws_region=aws_region, allowed_commands=allowed_commands
+            command="whoami", aws_region=aws_region, allowed_commands=_allowed_commands
         )
         return "User is not logged in to OCM" not in res["err"]
     except CommandExecuteError:
@@ -69,7 +71,7 @@ def check_flag_in_flags(command_list, flag_str):
 
 
 def build_command(command, allowed_commands=None, aws_region=None):
-    allowed_commands = allowed_commands or parse_help()
+    _allowed_commands = allowed_commands or parse_help()
     _user_command = shlex.split(command)
     command = ["rosa"]
     command.extend(_user_command)
@@ -81,22 +83,22 @@ def build_command(command, allowed_commands=None, aws_region=None):
         if cmd.startswith("--"):
             continue
 
-        json_output = allowed_commands.get(cmd, json_output.get(cmd, {}))
+        json_output = _allowed_commands.get(cmd, json_output.get(cmd, {}))
         add_json_output = json_output.get("json_output") is True
         if add_json_output:
             command.append("-ojson")
 
-        auto_answer_yes = allowed_commands.get(cmd, auto_answer_yes.get(cmd, {}))
+        auto_answer_yes = _allowed_commands.get(cmd, auto_answer_yes.get(cmd, {}))
         add_auto_answer_yes = auto_answer_yes.get("auto_answer_yes") is True
         if add_auto_answer_yes:
             command.append("--yes")
 
-        auto_update = allowed_commands.get(cmd, auto_update.get(cmd, {}))
+        auto_update = _allowed_commands.get(cmd, auto_update.get(cmd, {}))
         add_auto_update = auto_update.get("auto_mode") is True
         if add_auto_update:
             command.append("--mode=auto")
 
-        aws_region_flag = allowed_commands.get(cmd, aws_region_flag.get(cmd, {}))
+        aws_region_flag = _allowed_commands.get(cmd, aws_region_flag.get(cmd, {}))
         add_aws_region_flag = json_output.get("region") is True
         if add_aws_region_flag and aws_region:
             command.append(f"--region={aws_region}")
@@ -224,9 +226,10 @@ def parse_json_response(response):
     }
 
 
-def build_execute_command(command, allowed_commands, aws_region=None):
+def build_execute_command(command, allowed_commands=None, aws_region=None):
+    _allowed_commands = allowed_commands or parse_help()
     command = build_command(
-        command=command, allowed_commands=allowed_commands, aws_region=aws_region
+        command=command, allowed_commands=_allowed_commands, aws_region=aws_region
     )
     return execute_command(command=command)
 
@@ -285,7 +288,7 @@ def execute(
             )
 
     else:
-        if not is_logged_in(allowed_commands=allowed_commands, aws_region=aws_region):
+        if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region):
             raise NotLoggedInError(
                 "Not logged in to OCM, either pass 'token' or log in before running."
             )
