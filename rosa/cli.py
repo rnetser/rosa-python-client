@@ -285,7 +285,7 @@ def execute(
             )
 
     else:
-        if not is_logged_in(aws_region=aws_region):
+        if not is_logged_in(allowed_commands=allowed_commands, aws_region=aws_region):
             raise NotLoggedInError(
                 "Not logged in to OCM, either pass 'token' or log in before running."
             )
