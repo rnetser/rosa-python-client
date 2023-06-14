@@ -1,5 +1,7 @@
+import contextlib
 import functools
 import json
+import os
 import re
 import shlex
 import subprocess
@@ -8,10 +10,54 @@ from simple_logger.logger import get_logger
 
 
 LOGGER = get_logger(__name__)
+ROSA_STR = "rosa"
 
 
 class CommandExecuteError(Exception):
     pass
+
+
+class NotLoggedInError(Exception):
+    pass
+
+
+@contextlib.contextmanager
+def rosa_login_logout(env, token):
+    execute_command(
+        command=shlex.split(
+            f"{ROSA_STR} login {f'--env={env}' if env else ''} --token={token}"
+        )
+    )
+    yield
+    execute_command(command=shlex.split(f"{ROSA_STR} logout"))
+
+
+@contextlib.contextmanager
+def change_home_environment():
+    current_home = os.environ.get("HOME")
+    os.environ["HOME"] = "/tmp/"
+    yield
+    os.environ["HOME"] = current_home
+
+
+def is_logged_in():
+    try:
+        res = execute_command(command=shlex.split(f"{ROSA_STR} whoami"))
+        return "User is not logged in to OCM" not in res["err"]
+    except CommandExecuteError:
+        return False
+
+
+def execute_command(command):
+    joined_command = " ".join(command)
+    LOGGER.info(
+        f"Executing command: {re.sub(r'--token=.*', '--token=hashed-token', joined_command)}"
+    )
+    res = subprocess.run(command, capture_output=True, text=True)
+    if res.returncode != 0:
+        raise CommandExecuteError(f"Failed to execute: {res.stderr}")
+
+    return parse_json_response(response=res)
 
 
 def check_flag_in_flags(command_list, flag_str):
@@ -20,6 +66,39 @@ def check_flag_in_flags(command_list, flag_str):
         if flag_str in flag:
             return True
     return False
+
+
+def build_command(command, allowed_commands=None):
+    allowed_commands = allowed_commands or parse_help()
+    _user_command = shlex.split(command)
+    command = [ROSA_STR]
+    command.extend(_user_command)
+    json_output = {}
+    auto_answer_yes = {}
+    auto_update = {}
+    for cmd in command[1:]:
+        if cmd.startswith("--"):
+            continue
+
+        json_output = allowed_commands.get(cmd, json_output.get(cmd, {}))
+        add_json_output = json_output.get("json_output") is True
+        if add_json_output:
+            command.append("-ojson")
+
+        auto_answer_yes = allowed_commands.get(cmd, auto_answer_yes.get(cmd, {}))
+        add_auto_answer_yes = auto_answer_yes.get("auto_answer_yes") is True
+        if add_auto_answer_yes:
+            command.append("--yes")
+
+        auto_update = allowed_commands.get(cmd, auto_update.get(cmd, {}))
+        add_auto_update = auto_update.get("auto_mode") is True
+        if add_auto_update:
+            command.append("--mode=auto")
+
+        if any([add_json_output, add_auto_answer_yes, add_auto_update]):
+            break
+
+    return command
 
 
 def get_available_commands(command):
@@ -126,58 +205,49 @@ def parse_json_response(response):
     }
 
 
-def execute(command, allowed_commands=None):
+def execute(
+    command, allowed_commands=None, ocm_env="production", token=None, ocm_client=None
+):
     """
     Support commands and execute with ROSA cli
 
+    If 'token' or 'ocm_client' is passed, log in to rosa execute the command and then logout.
+
     Args:
-        command (str): ROSA cli command to execute
+        command (str): ROSA cli command to execute.
         allowed_commands (dict): Commands dict of dicts with following
-            options for each entry
-            Example:
-                {'create':
-                    {'account-roles': {'json_output': False, 'auto_answer_yes': True,
-                        'auto_mode': True, 'billing_model': False},
-                    'admin': {'json_output': True, 'auto_answer_yes': True, 'auto_mode': False, 'billing_model': False},
-                    'cluster': {'json_output': True, 'auto_answer_yes': True, 'auto_mode': True, 'billing_model': False}
-                    }}
+            options for each entry.
+        ocm_env (str): OCM env to log in into.
+        token (str): Access or refresh token generated from https://console.redhat.com/openshift/token/rosa.
+        ocm_client (OCMPythonClient): OCM client to use for log in.
+
+    Example:
+        allowed_commands = {'create':
+            {'account-roles': {'json_output': False, 'auto_answer_yes': True,
+                'auto_mode': True, 'billing_model': False},
+            'admin': {'json_output': True, 'auto_answer_yes': True, 'auto_mode': False, 'billing_model': False},
+            'cluster': {'json_output': True, 'auto_answer_yes': True, 'auto_mode': True, 'billing_model': False}
+            }}
 
     Returns:
         dict: {'out': res.stdout, 'err': res.stderr}
-                res.stdout/stderr will be parsed as json if possible, else str
+            res.stdout/stderr will be parsed as json if possible, else str
     """
-    allowed_commands = allowed_commands or parse_help()
-    _user_command = shlex.split(command)
-    command = ["rosa"]
-    command.extend(_user_command)
-    json_output = {}
-    auto_answer_yes = {}
-    auto_update = {}
-    for cmd in command[1:]:
-        if cmd.startswith("--"):
-            continue
+    _allowed_commands = allowed_commands or parse_help()
+    if token or ocm_client:
+        if ocm_client:
+            ocm_env = ocm_client.api_client.configuration.host
+            token = ocm_client.api_client.token
 
-        json_output = allowed_commands.get(cmd, json_output.get(cmd, {}))
-        add_json_output = json_output.get("json_output") is True
-        if add_json_output:
-            command.append("-ojson")
+        with change_home_environment(), rosa_login_logout(env=ocm_env, token=token):
+            command = build_command(command=command, allowed_commands=_allowed_commands)
+            return execute_command(command=command)
 
-        auto_answer_yes = allowed_commands.get(cmd, auto_answer_yes.get(cmd, {}))
-        add_auto_answer_yes = auto_answer_yes.get("auto_answer_yes") is True
-        if add_auto_answer_yes:
-            command.append("--yes")
+    else:
+        if not is_logged_in():
+            raise NotLoggedInError(
+                "Not logged in to OCM, either pass 'token' or log in before running."
+            )
 
-        auto_update = allowed_commands.get(cmd, auto_update.get(cmd, {}))
-        add_auto_update = auto_update.get("auto_mode") is True
-        if add_auto_update:
-            command.append("--mode=auto")
-
-        if any([add_json_output, add_auto_answer_yes, add_auto_update]):
-            break
-
-    LOGGER.info(f"Executing command: {' '.join(command)}")
-    res = subprocess.run(command, capture_output=True, text=True)
-    if res.returncode != 0:
-        raise CommandExecuteError(f"Failed to execute: {res.stderr}")
-
-    return parse_json_response(response=res)
+        command = build_command(command=command, allowed_commands=_allowed_commands)
+        return execute_command(command=command)
