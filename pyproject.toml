@@ -9,7 +9,11 @@ packages = [{include = "rosa"}]
 [tool.poetry.dependencies]
 python = "^3.8"
 python-simple-logger = "*"
+redhat-qe-cloud-tools = "^1.0.6"
 
+
+[tool.poetry.group.dev.dependencies]
+ipdb = "^0.13.13"
 
 [build-system]
 requires = ["poetry-core"]
