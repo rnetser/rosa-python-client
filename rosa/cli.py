@@ -11,6 +11,7 @@ from simple_logger.logger import get_logger
 
 
 LOGGER = get_logger(__name__)
+TIMEOUT_5MIN = 5 * 60
 
 
 class CommandExecuteError(Exception):
@@ -56,12 +57,13 @@ def is_logged_in(aws_region=None, allowed_commands=None):
         return False
 
 
-def execute_command(command):
+def execute_command(command, wait_timeout=TIMEOUT_5MIN):
     joined_command = " ".join(command)
     LOGGER.info(
-        f"Executing command: {re.sub(r'(--token=.* |--token=.*)', '--token=hashed-token ', joined_command)}"
+        f"Executing command: {re.sub(r'(--token=.* |--token=.*)', '--token=hashed-token', joined_command)}, "
+        f"waiting for {wait_timeout} seconds."
     )
-    res = subprocess.run(command, capture_output=True, text=True)
+    res = subprocess.run(command, capture_output=True, text=True, timeout=wait_timeout)
     if res.returncode != 0:
         raise CommandExecuteError(f"Failed to execute: {res.stderr}")
 
