@@ -6,12 +6,16 @@ import re
 import shlex
 import subprocess
 
-from clouds.aws.aws_utils import verify_aws_credentials
+from clouds.aws.aws_utils import set_and_verify_aws_credentials
 from simple_logger.logger import get_logger
 
 
 LOGGER = get_logger(__name__)
 TIMEOUT_5MIN = 5 * 60
+
+
+class MissingAWSCredentials(Exception):
+    pass
 
 
 class CommandExecuteError(Exception):
@@ -24,7 +28,6 @@ class NotLoggedInError(Exception):
 
 @contextlib.contextmanager
 def rosa_login_logout(env, token, aws_region, allowed_commands=None):
-    verify_aws_credentials()
     _allowed_commands = allowed_commands or parse_help()
     build_execute_command(
         command=f"login {f'--env={env}' if env else ''} --token={token}",
@@ -307,6 +310,8 @@ def execute(
     _allowed_commands = allowed_commands or parse_help()
 
     if token or ocm_client:
+        set_and_verify_aws_credentials()
+
         if ocm_client:
             ocm_env = ocm_client.api_client.configuration.host
             token = ocm_client.api_client.token
@@ -332,3 +337,9 @@ def execute(
         return build_execute_command(
             command=command, allowed_commands=_allowed_commands, aws_region=aws_region
         )
+
+
+if __name__ == "__main__":
+    """
+    for local debugging.
+    """
