@@ -1437,7 +1437,7 @@ name = "pycparser"
 version = "2.21"
 description = "C parser in Python"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = "*"
 files = [
     {file = "pycparser-2.21-py2.py3-none-any.whl", hash = "sha256:8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9"},
     {file = "pycparser-2.21.tar.gz", hash = "sha256:e644fdec12f7872f86c58ff790da456218b10f863970249516d60a5eaca77206"},
@@ -1804,13 +1804,13 @@ full = ["numpy"]
 
 [[package]]
 name = "redhat-qe-cloud-tools"
-version = "1.0.7"
+version = "1.0.8"
 description = "Python utilities to manage cloud services, such as AWS."
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "redhat_qe_cloud_tools-1.0.7-py3-none-any.whl", hash = "sha256:98c851fa22d56fa124540fbe408fecc199473bec7d9547f7dc905f4f1925d414"},
-    {file = "redhat_qe_cloud_tools-1.0.7.tar.gz", hash = "sha256:5fb45d811c77be50c920db7c72126d5fbf37480a55aa1cb17b2d4e1f17a7b06d"},
+    {file = "redhat_qe_cloud_tools-1.0.8-py3-none-any.whl", hash = "sha256:877958ea38bfc0117f8cef163fcaa95df970a89b27dd046a6a96f8de81102f67"},
+    {file = "redhat_qe_cloud_tools-1.0.8.tar.gz", hash = "sha256:2cee5b86d9e17814b8f6d7cdf6e3e4ea1d3f29464ba07a1ad78acbf4b412728b"},
 ]
 
 [package.dependencies]
