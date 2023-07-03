@@ -6,6 +6,7 @@ import re
 import shlex
 import subprocess
 
+from benedict import benedict
 from clouds.aws.aws_utils import set_and_verify_aws_credentials
 from simple_logger.logger import get_logger
 
@@ -86,38 +87,21 @@ def build_command(command, allowed_commands=None, aws_region=None):
     _user_command = shlex.split(command)
     command = ["rosa"]
     command.extend(_user_command)
-    json_output = {}
-    auto_answer_yes = {}
-    auto_update = {}
-    aws_region_flag = {}
-    for cmd in command[1:]:
-        if cmd.startswith("--"):
-            continue
+    commands_to_process = [_cmd for _cmd in _user_command if not _cmd.startswith("--")]
+    commands_dict = benedict(_allowed_commands, keypath_separator=" ")
+    _output = commands_dict[commands_to_process]
 
-        json_output = _allowed_commands.get(cmd, json_output.get(cmd, {}))
-        add_json_output = json_output.get("json_output") is True
-        if add_json_output:
-            command.append("-ojson")
+    if _output.get("json_output") is True:
+        command.append("-ojson")
 
-        auto_answer_yes = _allowed_commands.get(cmd, auto_answer_yes.get(cmd, {}))
-        add_auto_answer_yes = auto_answer_yes.get("auto_answer_yes") is True
-        if add_auto_answer_yes:
-            command.append("--yes")
+    if _output.get("auto_answer_yes") is True:
+        command.append("--yes")
 
-        auto_update = _allowed_commands.get(cmd, auto_update.get(cmd, {}))
-        add_auto_update = auto_update.get("auto_mode") is True
-        if add_auto_update:
-            command.append("--mode=auto")
+    if _output.get("auto_mode") is True:
+        command.append("--mode=auto")
 
-        aws_region_flag = _allowed_commands.get(cmd, aws_region_flag.get(cmd, {}))
-        add_aws_region_flag = json_output.get("region") is True
-        if add_aws_region_flag and aws_region:
-            command.append(f"--region={aws_region}")
-
-        if any(
-            [add_json_output, add_auto_answer_yes, add_auto_update, add_aws_region_flag]
-        ):
-            break
+    if _output.get("region") is True and aws_region:
+        command.append(f"--region={aws_region}")
 
     return command
 
