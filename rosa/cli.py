@@ -27,6 +27,15 @@ class NotLoggedInError(Exception):
     pass
 
 
+def hash_log_secrets(log, secrets):
+    for secret in secrets:
+        log = re.sub(
+            rf"(--{secret}=.* |--{secret}=.*)", f"--{secret}=hashed-{secret} ", log
+        )
+
+    return log
+
+
 @contextlib.contextmanager
 def rosa_login_logout(env, token, aws_region, allowed_commands=None):
     _allowed_commands = allowed_commands or parse_help()
@@ -62,11 +71,10 @@ def is_logged_in(aws_region=None, allowed_commands=None):
 
 
 def execute_command(command, wait_timeout=TIMEOUT_5MIN):
-    joined_command = " ".join(command)
-    LOGGER.info(
-        f"Executing command: {re.sub(r'(--token=.* |--token=.*)', '--token=hashed-token', joined_command)}, "
-        f"waiting for {wait_timeout} seconds."
+    log = (
+        f"Executing command: {' '.join(command)}), waiting for {wait_timeout} seconds."
     )
+    LOGGER.info(hash_log_secrets(log=log, secrets=["token"]))
     res = subprocess.run(command, capture_output=True, text=True, timeout=wait_timeout)
     if res.returncode != 0:
         raise CommandExecuteError(f"Failed to execute: {res.stderr}")
@@ -83,11 +91,18 @@ def check_flag_in_flags(command_list, flag_str):
 
 
 def build_command(command, allowed_commands=None, aws_region=None):
+    LOGGER.info(
+        LOGGER.info(
+            hash_log_secrets(log=f"Parsing user command: {command}", secrets=["token"])
+        )
+    )
     _allowed_commands = allowed_commands or parse_help()
     _user_command = shlex.split(command)
     command = ["rosa"]
     command.extend(_user_command)
-    commands_to_process = [_cmd for _cmd in _user_command if not _cmd.startswith("--")]
+    commands_to_process = [
+        _cmd for _cmd in _user_command if not _cmd.startswith(("--", "-"))
+    ]
     commands_dict = benedict(_allowed_commands, keypath_separator=" ")
     _output = commands_dict[commands_to_process]
 

@@ -23,3 +23,9 @@ git main
 git pull
 release-it # Follow the instructions
 ```
+
+## Known Limitations:
+Although rose cli support args with ` ` (space) when using this module we only accept arg=value
+
+rosa cli accept: `rosa create cluster --cluster-name mycluster`  
+when called with this module the command should be: `rosa create cluster --cluster-name=mycluster`  
