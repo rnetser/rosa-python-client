@@ -71,9 +71,7 @@ def is_logged_in(aws_region=None, allowed_commands=None):
 
 
 def execute_command(command, wait_timeout=TIMEOUT_5MIN):
-    log = (
-        f"Executing command: {' '.join(command)}), waiting for {wait_timeout} seconds."
-    )
+    log = f"Executing command: {' '.join(command)}, waiting for {wait_timeout} seconds."
     LOGGER.info(hash_log_secrets(log=log, secrets=["token"]))
     res = subprocess.run(command, capture_output=True, text=True, timeout=wait_timeout)
     if res.returncode != 0:
