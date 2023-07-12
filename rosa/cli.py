@@ -92,9 +92,7 @@ def check_flag_in_flags(command_list, flag_str):
 
 def build_command(command, allowed_commands=None, aws_region=None):
     LOGGER.info(
-        LOGGER.info(
-            hash_log_secrets(log=f"Parsing user command: {command}", secrets=["token"])
-        )
+        hash_log_secrets(log=f"Parsing user command: {command}", secrets=["token"])
     )
     _allowed_commands = allowed_commands or parse_help()
     _user_command = shlex.split(command)
