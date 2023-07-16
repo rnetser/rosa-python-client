@@ -307,7 +307,7 @@ def execute(
     _allowed_commands = allowed_commands or parse_help()
 
     if token or ocm_client:
-        set_and_verify_aws_credentials()
+        set_and_verify_aws_credentials(region_name=aws_region)
 
         if ocm_client:
             ocm_env = ocm_client.api_client.configuration.host
