@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rosa-python-client"
-version = "1.0.20"
+version = "1.0.21"
 description = "Wrapper for rosa cli"
 authors = ["Meni Yakove <myakove@gmail.com>"]
 readme = "README.md"
