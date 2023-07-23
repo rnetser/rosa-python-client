@@ -36,8 +36,7 @@ def hash_log_secrets(log, secrets):
     return log
 
 
-@contextlib.contextmanager
-def rosa_login_logout(env, token, aws_region, allowed_commands=None):
+def rosa_login(env, token, aws_region, allowed_commands=None):
     _allowed_commands = allowed_commands or parse_help()
     build_execute_command(
         command=f"login {f'--env={env}' if env else ''} --token={token}",
@@ -47,7 +46,9 @@ def rosa_login_logout(env, token, aws_region, allowed_commands=None):
     if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region):
         raise NotLoggedInError("Failed to login to AWS.")
 
-    yield
+
+def rosa_logout(allowed_commands=None):
+    _allowed_commands = allowed_commands or parse_help()
     build_execute_command(command="logout", allowed_commands=_allowed_commands)
 
 
@@ -313,17 +314,21 @@ def execute(
             ocm_env = ocm_client.api_client.configuration.host
             token = ocm_client.api_client.token
 
-        with change_home_environment(), rosa_login_logout(
+        rosa_login(
             env=ocm_env,
             token=token,
             aws_region=aws_region,
             allowed_commands=_allowed_commands,
-        ):
-            return build_execute_command(
-                command=command,
-                allowed_commands=_allowed_commands,
-                aws_region=aws_region,
-            )
+        )
+
+        # If running on openshift-ci we need to change $HOME to /tmp
+        if os.environ.get("OPENSHIFT_CI") == "true":
+            with change_home_environment():
+                return build_execute_command(
+                    command=command,
+                    allowed_commands=_allowed_commands,
+                    aws_region=aws_region,
+                )
 
     else:
         if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region):
