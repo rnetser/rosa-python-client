@@ -329,6 +329,12 @@ def execute(
                     allowed_commands=_allowed_commands,
                     aws_region=aws_region,
                 )
+        else:
+            return build_execute_command(
+                command=command,
+                allowed_commands=_allowed_commands,
+                aws_region=aws_region,
+            )
 
     else:
         if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region):
