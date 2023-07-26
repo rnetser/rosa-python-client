@@ -312,38 +312,28 @@ def execute(
     _allowed_commands = allowed_commands or parse_help()
 
     if token or ocm_client:
-        set_and_verify_aws_credentials(region_name=aws_region)
-
         if ocm_client:
             ocm_env = ocm_client.api_client.configuration.host
             token = ocm_client.api_client.token
 
         # If running on openshift-ci we need to change $HOME to /tmp
         if os.environ.get("OPENSHIFT_CI") == "true":
-            rosa_login(
-                env=ocm_env,
-                token=token,
-                aws_region=aws_region,
-                allowed_commands=_allowed_commands,
-            )
-
+            LOGGER.info("Running in openshift ci")
             with change_home_environment():
-                return build_execute_command(
-                    command=command,
+                return _prepare_and_execute_command(
                     allowed_commands=_allowed_commands,
                     aws_region=aws_region,
+                    command=command,
+                    ocm_env=ocm_env,
+                    token=token,
                 )
         else:
-            rosa_login(
-                env=ocm_env,
-                token=token,
-                aws_region=aws_region,
+            return _prepare_and_execute_command(
                 allowed_commands=_allowed_commands,
-            )
-            return build_execute_command(
+                aws_region=aws_region,
                 command=command,
-                allowed_commands=_allowed_commands,
-                aws_region=aws_region,
+                ocm_env=ocm_env,
+                token=token,
             )
 
     else:
@@ -355,6 +345,21 @@ def execute(
         return build_execute_command(
             command=command, allowed_commands=_allowed_commands, aws_region=aws_region
         )
+
+
+def _prepare_and_execute_command(allowed_commands, aws_region, command, ocm_env, token):
+    set_and_verify_aws_credentials(region_name=aws_region)
+    rosa_login(
+        env=ocm_env,
+        token=token,
+        aws_region=aws_region,
+        allowed_commands=allowed_commands,
+    )
+    return build_execute_command(
+        command=command,
+        allowed_commands=allowed_commands,
+        aws_region=aws_region,
+    )
 
 
 if __name__ == "__main__":
