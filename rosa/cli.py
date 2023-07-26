@@ -109,7 +109,12 @@ def build_command(command, allowed_commands=None, aws_region=None):
     commands_to_process_len = len(commands_to_process)
     extra_commands = set()
     for idx in range(commands_to_process_len):
-        _output = commands_dict[commands_to_process[: commands_to_process_len - idx]]
+        try:
+            _output = commands_dict[
+                commands_to_process[: commands_to_process_len - idx]
+            ]
+        except KeyError:
+            continue
         if _output.get("json_output") is True:
             extra_commands.add("-ojson")
 
