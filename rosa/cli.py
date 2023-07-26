@@ -43,7 +43,7 @@ def rosa_login(env, token, aws_region, allowed_commands=None):
         return
 
     build_execute_command(
-        command=f"login f'--env={env} --token={token}",
+        command=f"login --env={env} --token={token}",
         allowed_commands=_allowed_commands,
         aws_region=aws_region,
     )
