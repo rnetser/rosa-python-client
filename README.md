@@ -15,6 +15,8 @@ export GITHUB_TOKEN=<your_github_token>
 sudo npm install --global release-it
 npm install --save-dev @release-it/bumper
 ```
+Note: execute outside the repository directory (for example `~/`)
+
 ### usage:
 * To create a new release, run:
 
