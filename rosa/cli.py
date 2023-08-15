@@ -45,7 +45,6 @@ def rosa_login(env, token, aws_region, allowed_commands=None):
     build_execute_command(
         command=f"login --env={env} --token={token}",
         allowed_commands=_allowed_commands,
-        aws_region=aws_region,
     )
     if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region):
         raise NotLoggedInError("Failed to login to AWS.")
