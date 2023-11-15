@@ -29,9 +29,7 @@ class NotLoggedInError(Exception):
 
 def hash_log_secrets(log, secrets):
     for secret in secrets:
-        log = re.sub(
-            rf"(--{secret}=.* |--{secret}=.*)", f"--{secret}=hashed-{secret} ", log
-        )
+        log = re.sub(rf"(--{secret}=.* |--{secret}=.*)", f"--{secret}=hashed-{secret} ", log)
 
     return log
 
@@ -66,9 +64,7 @@ def change_home_environment():
 def is_logged_in(aws_region=None, allowed_commands=None):
     _allowed_commands = allowed_commands or parse_help()
     try:
-        res = build_execute_command(
-            command="whoami", aws_region=aws_region, allowed_commands=_allowed_commands
-        )
+        res = build_execute_command(command="whoami", aws_region=aws_region, allowed_commands=_allowed_commands)
         return "User is not logged in to OCM" not in res["err"]
     except CommandExecuteError:
         return False
@@ -94,24 +90,18 @@ def check_flag_in_flags(command_list, flag_str):
 
 
 def build_command(command, allowed_commands=None, aws_region=None):
-    LOGGER.info(
-        hash_log_secrets(log=f"Parsing user command: {command}", secrets=["token"])
-    )
+    LOGGER.info(hash_log_secrets(log=f"Parsing user command: {command}", secrets=["token"]))
     _allowed_commands = allowed_commands or parse_help()
     _user_command = shlex.split(command)
     command = ["rosa"]
     command.extend(_user_command)
-    commands_to_process = [
-        _cmd for _cmd in _user_command if not _cmd.startswith(("--", "-"))
-    ]
+    commands_to_process = [_cmd for _cmd in _user_command if not _cmd.startswith(("--", "-"))]
     commands_dict = benedict(_allowed_commands, keypath_separator=" ")
     commands_to_process_len = len(commands_to_process)
     extra_commands = set()
     for idx in range(commands_to_process_len):
         try:
-            _output = commands_dict[
-                commands_to_process[: commands_to_process_len - idx]
-            ]
+            _output = commands_dict[commands_to_process[: commands_to_process_len - idx]]
         except KeyError:
             continue
         if _output.get("json_output") is True:
@@ -134,9 +124,7 @@ def get_available_commands(command):
     __available_commands = []
     command.append("--help")
     res = subprocess.run(command, capture_output=True, check=True, text=True)
-    available_commands = re.findall(
-        r"Available Commands:(.*)\nFlags:", res.stdout, re.DOTALL
-    )
+    available_commands = re.findall(r"Available Commands:(.*)\nFlags:", res.stdout, re.DOTALL)
     if available_commands:
         available_commands = available_commands[0]
         available_commands = available_commands.strip()
@@ -150,12 +138,8 @@ def get_available_commands(command):
 
 def get_available_flags(command):
     command.append("--help")
-    available_flags = subprocess.run(
-        command, capture_output=True, check=True, text=True
-    )
-    available_flags = re.findall(
-        r"Flags:(.*)Global Flags:(.*)", available_flags.stdout, re.DOTALL
-    )
+    available_flags = subprocess.run(command, capture_output=True, check=True, text=True)
+    available_flags = re.findall(r"Flags:(.*)Global Flags:(.*)", available_flags.stdout, re.DOTALL)
     if available_flags:
         available_flags = " ".join([flags for flags in available_flags[0]])
         available_flags = available_flags.strip()
@@ -215,9 +199,7 @@ def parse_json_response(response):
 
 def build_execute_command(command, allowed_commands=None, aws_region=None):
     _allowed_commands = allowed_commands or parse_help()
-    command = build_command(
-        command=command, allowed_commands=_allowed_commands, aws_region=aws_region
-    )
+    command = build_command(command=command, allowed_commands=_allowed_commands, aws_region=aws_region)
     return execute_command(command=command)
 
 
@@ -284,13 +266,9 @@ def execute(
 
     else:
         if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region):
-            raise NotLoggedInError(
-                "Not logged in to OCM, either pass 'token' or log in before running."
-            )
+            raise NotLoggedInError("Not logged in to OCM, either pass 'token' or log in before running.")
 
-        return build_execute_command(
-            command=command, allowed_commands=_allowed_commands, aws_region=aws_region
-        )
+        return build_execute_command(command=command, allowed_commands=_allowed_commands, aws_region=aws_region)
 
 
 def _prepare_and_execute_command(allowed_commands, aws_region, command, ocm_env, token):

@@ -18,9 +18,7 @@ def test_json(rosa_commands):
     allowed_commands = parse_help()
     command = rosa_commands["command"]
     aws_region = rosa_commands[AWS_REGION_STR]
-    rosa_command = build_command(
-        command=command, allowed_commands=allowed_commands, aws_region=aws_region
-    )
+    rosa_command = build_command(command=command, allowed_commands=allowed_commands, aws_region=aws_region)
     expected = benedict(allowed_commands, keypath_separator=" ")[command]
     LOGGER.info(f"Processing command: {' '.join(rosa_command)}")
 
