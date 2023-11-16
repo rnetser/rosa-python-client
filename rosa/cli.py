@@ -11,7 +11,7 @@ from clouds.aws.aws_utils import set_and_verify_aws_credentials
 from simple_logger.logger import get_logger
 
 
-LOGGER = get_logger(__name__)
+LOGGER = get_logger(name=__name__)
 TIMEOUT_5MIN = 5 * 60
 
 

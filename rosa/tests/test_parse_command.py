@@ -6,7 +6,7 @@ from rosa.cli import build_command, parse_help
 from rosa.tests.const import AWS_REGION_STR
 
 
-LOGGER = get_logger(__name__)
+LOGGER = get_logger(name=__name__)
 
 
 @pytest.fixture()

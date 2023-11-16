@@ -9,3 +9,14 @@ exclude =
     Pipfile.*,
     docs/*,
     .cache/*
+
+fcn_exclude_functions =
+    re,
+    LOGGER,
+    subprocess,
+    benedict,
+    json,
+    metafunc,
+
+enable-extensions =
+    FCN,
