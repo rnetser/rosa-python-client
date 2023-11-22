@@ -38,6 +38,7 @@ def hash_log_keys(log):
         "etcd-encryption-kms-arn",
         "audit-log-arn",
         "base-domain",
+        "installer-role-arn",
     ):
         log = re.sub(rf"(--{_key}=[^\s]+)", f"--{_key}=hashed-value ", log)
 
