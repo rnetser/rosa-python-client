@@ -27,21 +27,18 @@ class NotLoggedInError(Exception):
     pass
 
 
-HASHED_KEYS = [
-    "token",
-    "worker-iam-role",
-    "support-role-arn",
-    "role-arn",
-    "controlplane-iam-role",
-    "kms-key-arn",
-    "etcd-encryption-kms-arn",
-    "audit-log-arn",
-    "base-domain",
-]
-
-
-def hash_log_keys(log, keys):
-    for _key in keys:
+def hash_log_keys(log):
+    for _key in (
+        "token",
+        "worker-iam-role",
+        "support-role-arn",
+        "role-arn",
+        "controlplane-iam-role",
+        "kms-key-arn",
+        "etcd-encryption-kms-arn",
+        "audit-log-arn",
+        "base-domain",
+    ):
         log = re.sub(rf"(--{_key}=[^\s]+)", f"--{_key}=hashed-value ", log)
 
     return log
@@ -85,7 +82,7 @@ def is_logged_in(aws_region=None, allowed_commands=None):
 
 def execute_command(command, wait_timeout=TIMEOUT_5MIN):
     log = f"Executing command: {' '.join(command)}, waiting for {wait_timeout} seconds."
-    hashed_log = hash_log_keys(log=log, keys=HASHED_KEYS)
+    hashed_log = hash_log_keys(log=log)
     LOGGER.info(hashed_log)
     res = subprocess.run(command, capture_output=True, text=True, timeout=wait_timeout)
     if res.returncode != 0:
@@ -103,7 +100,7 @@ def check_flag_in_flags(command_list, flag_str):
 
 
 def build_command(command, allowed_commands=None, aws_region=None):
-    LOGGER.info(hash_log_keys(log=f"Parsing user command: {command}", keys=HASHED_KEYS))
+    LOGGER.info(hash_log_keys(log=f"Parsing user command: {command}"))
     _allowed_commands = allowed_commands or parse_help()
     _user_command = shlex.split(command)
     command = ["rosa"]
