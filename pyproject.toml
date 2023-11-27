@@ -26,7 +26,7 @@ classifiers = [
 python = "^3.8"
 redhat-qe-cloud-tools = "^1.0.6"
 python-simple-logger = "^1.0.5"
-python-benedict = "^0.32.0"
+python-benedict = "^0.33.0"
 
 [tool.poetry.group.dev.dependencies]
 ipdb = "^0.13.13"
