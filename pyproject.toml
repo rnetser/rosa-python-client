@@ -24,7 +24,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-redhat-qe-cloud-tools = "^1.0.6"
+redhat-qe-cloud-tools = "*"
 python-simple-logger = "^1.0.5"
 python-benedict = "^0.33.0"
 
@@ -42,7 +42,6 @@ Download = "https://pypi.org/project/rosa-python-client/"
 
 [tool.poetry.group.tests.dependencies]
 pytest = "^7.4.0"
-requests = "^2.31.0"
 
 [tool.poetry-dynamic-versioning.substitution]
 files = ["VERSION"]
