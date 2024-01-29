@@ -41,7 +41,7 @@ Download = "https://pypi.org/project/rosa-python-client/"
 "Bug Tracker" = "https://github.com/RedHatQE/rosa-python-client/issues"
 
 [tool.poetry.group.tests.dependencies]
-pytest = "^7.4.0"
+pytest = "^8.0.0"
 
 [tool.poetry-dynamic-versioning.substitution]
 files = ["VERSION"]
