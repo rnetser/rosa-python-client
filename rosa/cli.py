@@ -47,7 +47,7 @@ def hash_log_keys(log):
 
 def rosa_login(env, token, aws_region, allowed_commands=None):
     _allowed_commands = allowed_commands or parse_help()
-    if is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region):
+    if is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region, env=env):
         LOGGER.info(f"Already logged in to {env} [region: {aws_region}].")
         return
 
@@ -55,7 +55,7 @@ def rosa_login(env, token, aws_region, allowed_commands=None):
         command=f"login --env={env} --token={token}",
         allowed_commands=_allowed_commands,
     )
-    if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region):
+    if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region, env=env):
         raise NotLoggedInError("Failed to login to AWS.")
 
 
@@ -72,11 +72,11 @@ def change_home_environment():
     os.environ["HOME"] = current_home
 
 
-def is_logged_in(aws_region=None, allowed_commands=None):
+def is_logged_in(aws_region=None, allowed_commands=None, env=None):
     _allowed_commands = allowed_commands or parse_help()
     try:
         res = build_execute_command(command="whoami", aws_region=aws_region, allowed_commands=_allowed_commands)
-        return "User is not logged in to OCM" not in res["err"]
+        return ("User is not logged in to OCM" not in res["err"]) and (res["out"]["OCM API"] == env)
     except CommandExecuteError:
         return False
 
@@ -276,7 +276,7 @@ def execute(
             )
 
     else:
-        if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region):
+        if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region, env=ocm_env):
             raise NotLoggedInError("Not logged in to OCM, either pass 'token' or log in before running.")
 
         return build_execute_command(command=command, allowed_commands=_allowed_commands, aws_region=aws_region)
