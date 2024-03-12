@@ -133,7 +133,7 @@ def build_command(command, allowed_commands=None, aws_region=None):
 
 def get_available_commands(command):
     __available_commands = []
-    command.append("--help")
+    command = update_command(command=command)
     res = subprocess.run(command, capture_output=True, check=True, text=True)
     available_commands = re.findall(r"Available Commands:(.*)\nFlags:", res.stdout, re.DOTALL)
     if available_commands:
@@ -148,7 +148,7 @@ def get_available_commands(command):
 
 
 def get_available_flags(command):
-    command.append("--help")
+    command = update_command(command=command)
     available_flags = subprocess.run(command, capture_output=True, check=True, text=True)
     available_flags = re.findall(r"Flags:(.*)Global Flags:(.*)", available_flags.stdout, re.DOTALL)
     if available_flags:
@@ -295,6 +295,16 @@ def _prepare_and_execute_command(allowed_commands, aws_region, command, ocm_env,
         allowed_commands=allowed_commands,
         aws_region=aws_region,
     )
+
+
+def update_command(command):
+    # Addon ID is needed until https://github.com/openshift/rosa/issues/1835 is resolved
+    if "rosa edit addon" in " ".join(command):
+        command.append("addon_name")
+
+    command.append("--help")
+
+    return command
 
 
 if __name__ == "__main__":
