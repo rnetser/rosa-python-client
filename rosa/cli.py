@@ -83,10 +83,10 @@ def is_logged_in(env, aws_region=None, allowed_commands=None):
     try:
         res = build_execute_command(command="whoami", aws_region=aws_region, allowed_commands=_allowed_commands)
 
-        logged_in_env = res["out"].get("OCM API")
-        if logged_in_env != env:
+        logged_in_ocm_env = res["out"].get("OCM API")
+        if logged_in_ocm_env != env:
             raise NotLoggedInOrWrongEnvError(
-                f"User is logged in to OCM in {logged_in_env} environment and not {env} environment."
+                f"User is logged in to OCM in {logged_in_ocm_env} environment and not {env} environment."
             )
 
     except CommandExecuteError as ex:
