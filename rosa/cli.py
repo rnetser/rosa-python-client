@@ -8,6 +8,7 @@ import subprocess
 
 from benedict import benedict
 from clouds.aws.aws_utils import set_and_verify_aws_credentials
+from ocm_python_wrapper.ocm_client import OCMPythonClient
 from simple_logger.logger import get_logger
 
 
@@ -258,10 +259,16 @@ def execute(
     """
     _allowed_commands = allowed_commands or parse_help()
 
+    if not (token or ocm_client):
+        raise ValueError("You must pass either 'token' or 'ocm_client'")
+
     if token or ocm_client:
         if ocm_client:
             ocm_env = ocm_client.api_client.configuration.host
             token = ocm_client.api_client.token
+
+        else:
+            ocm_env = OCMPythonClient.get_base_api_uri(api_host=ocm_env)
 
         # If running on openshift-ci we need to change $HOME to /tmp
         if os.environ.get("OPENSHIFT_CI") == "true":
