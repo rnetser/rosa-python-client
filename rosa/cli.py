@@ -41,7 +41,7 @@ def hash_log_keys(log):
         "installer-role-arn",
         "billing-account",
     ):
-        log = re.sub(rf"(--{_key}=[^\s]+)", f"--{_key}={'*'*5} ", log)
+        log = re.sub(rf"(--{_key}=[^\s]+)", f"--{_key}={'*' * 5} ", log)
 
     return log
 
