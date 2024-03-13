@@ -40,7 +40,7 @@ def hash_log_keys(log):
         "base-domain",
         "installer-role-arn",
     ):
-        log = re.sub(rf"(--{_key}=[^\s]+)", f"--{_key}={'*'*5} ", log)
+        log = re.sub(rf"(--{_key}=[^\s]+)", f"--{_key}={'*' * 5} ", log)
 
     return log
 
