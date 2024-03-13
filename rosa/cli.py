@@ -76,7 +76,7 @@ def change_home_environment():
     os.environ["HOME"] = current_home
 
 
-def is_logged_in(aws_region=None, allowed_commands=None, env=None):
+def is_logged_in(env, aws_region=None, allowed_commands=None):
     _allowed_commands = allowed_commands or parse_help()
 
     try:
