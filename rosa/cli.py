@@ -85,7 +85,7 @@ def is_logged_in(aws_region=None, allowed_commands=None, env=None):
         logged_in_env = res["out"].get("OCM API")
         if logged_in_env != env:
             raise NotLoggedInOrWrongEnvError(
-                "User is logged in to OCM in {logged_in_env} environment " f"and not {env} environment."
+                "User is logged in to OCM in {logged_in_env} environment and not {env} environment."
             )
 
     except CommandExecuteError as ex:
