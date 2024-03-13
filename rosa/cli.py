@@ -77,8 +77,15 @@ def is_logged_in(aws_region=None, allowed_commands=None, env=None):
     _allowed_commands = allowed_commands or parse_help()
     try:
         res = build_execute_command(command="whoami", aws_region=aws_region, allowed_commands=_allowed_commands)
-        return ("User is not logged in to OCM" not in res["err"]) and (res["out"]["OCM API"] == env)
-    except CommandExecuteError:
+
+        if (logged_in_env := res["out"]["OCM API"]) and logged_in_env != env:
+            LOGGER.error(f"User is logged in to OCM in {logged_in_env} environment and not {env} environment.")
+            return False
+
+        return True
+
+    except CommandExecuteError as ex:
+        LOGGER.error(f"Failed to execute 'rosa whoami': {ex}")
         return False
 
 
