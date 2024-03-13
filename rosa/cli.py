@@ -55,7 +55,8 @@ def rosa_login(env, token, aws_region, allowed_commands=None):
         LOGGER.info(f"Already logged in to {env} [region: {aws_region}].")
         return
 
-    except NotLoggedInOrWrongEnvError:
+    except NotLoggedInOrWrongEnvError as ex:
+        LOGGER.error(ex)
         build_execute_command(
             command=f"login --env={env} --token={token}",
             allowed_commands=_allowed_commands,
@@ -85,7 +86,7 @@ def is_logged_in(env, aws_region=None, allowed_commands=None):
         logged_in_env = res["out"].get("OCM API")
         if logged_in_env != env:
             raise NotLoggedInOrWrongEnvError(
-                "User is logged in to OCM in {logged_in_env} environment and not {env} environment."
+                f"User is logged in to OCM in {logged_in_env} environment and not {env} environment."
             )
 
     except CommandExecuteError as ex:
