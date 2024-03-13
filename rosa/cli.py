@@ -24,7 +24,7 @@ class CommandExecuteError(Exception):
     pass
 
 
-class NotLoggedInError(Exception):
+class NotLoggedInOrWrongEnvError(Exception):
     pass
 
 
@@ -49,16 +49,18 @@ def hash_log_keys(log):
 
 def rosa_login(env, token, aws_region, allowed_commands=None):
     _allowed_commands = allowed_commands or parse_help()
-    if is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region, env=env):
+
+    try:
+        is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region, env=env)
         LOGGER.info(f"Already logged in to {env} [region: {aws_region}].")
         return
 
-    build_execute_command(
-        command=f"login --env={env} --token={token}",
-        allowed_commands=_allowed_commands,
-    )
-    if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region, env=env):
-        raise NotLoggedInError("Failed to login to AWS.")
+    except NotLoggedInOrWrongEnvError:
+        build_execute_command(
+            command=f"login --env={env} --token={token}",
+            allowed_commands=_allowed_commands,
+        )
+        is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region, env=env)
 
 
 def rosa_logout(allowed_commands=None):
@@ -76,18 +78,18 @@ def change_home_environment():
 
 def is_logged_in(aws_region=None, allowed_commands=None, env=None):
     _allowed_commands = allowed_commands or parse_help()
+
     try:
         res = build_execute_command(command="whoami", aws_region=aws_region, allowed_commands=_allowed_commands)
 
-        if (logged_in_env := res["out"]["OCM API"]) and logged_in_env != env:
-            LOGGER.error(f"User is logged in to OCM in {logged_in_env} environment and not {env} environment.")
-            return False
-
-        return True
+        logged_in_env = res["out"].get("OCM API")
+        if logged_in_env != env:
+            raise NotLoggedInOrWrongEnvError(
+                "User is logged in to OCM in {logged_in_env} environment " f"and not {env} environment."
+            )
 
     except CommandExecuteError as ex:
-        LOGGER.error(f"Failed to execute 'rosa whoami': {ex}")
-        return False
+        raise NotLoggedInOrWrongEnvError(f"Failed to execute 'rosa whoami': {ex}")
 
 
 def execute_command(command, wait_timeout=TIMEOUT_5MIN):
@@ -259,9 +261,6 @@ def execute(
     """
     _allowed_commands = allowed_commands or parse_help()
 
-    if not (token or ocm_client):
-        raise ValueError("You must pass either 'token' or 'ocm_client'")
-
     if token or ocm_client:
         if ocm_client:
             ocm_env = ocm_client.api_client.configuration.host
@@ -291,8 +290,7 @@ def execute(
             )
 
     else:
-        if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region, env=ocm_env):
-            raise NotLoggedInError("Not logged in to OCM, either pass 'token' or log in before running.")
+        is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region, env=ocm_env)
 
         return build_execute_command(command=command, allowed_commands=_allowed_commands, aws_region=aws_region)
 

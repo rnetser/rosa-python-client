@@ -9,7 +9,7 @@ exclude = [".git", ".venv", ".mypy_cache", ".tox", "__pycache__"]
 
 [tool.poetry]
 name = "rosa-python-client"
-version = "0.0.0"
+version = "1.0.62"
 description = "Wrapper for rosa cli"
 authors = ["Meni Yakove <myakove@gmail.com>"]
 readme = "README.md"
@@ -27,7 +27,7 @@ python = "^3.8"
 redhat-qe-cloud-tools = ">=1.0.19"
 python-simple-logger = ">=1.0.5"
 python-benedict = "^0.33.0"
-openshift-cluster-management-python-wrapper = "*"
+openshift-cluster-management-python-wrapper = "^1.0.86"
 
 [tool.poetry.group.dev.dependencies]
 ipdb = "^0.13.13"
