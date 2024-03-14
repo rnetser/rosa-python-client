@@ -56,7 +56,6 @@ def rosa_login(env, token, aws_region, allowed_commands=None):
         return
 
     except NotLoggedInOrWrongEnvError:
-        LOGGER.info("Not logged in to ROSA; trying to log in.")
         build_execute_command(
             command=f"login --env={env} --token={token}",
             allowed_commands=_allowed_commands,
