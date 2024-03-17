@@ -8,6 +8,7 @@ import subprocess
 
 from benedict import benedict
 from clouds.aws.aws_utils import set_and_verify_aws_credentials
+from ocm_python_wrapper.ocm_client import OCMPythonClient
 from simple_logger.logger import get_logger
 
 
@@ -23,7 +24,7 @@ class CommandExecuteError(Exception):
     pass
 
 
-class NotLoggedInError(Exception):
+class NotLoggedInOrWrongEnvError(Exception):
     pass
 
 
@@ -39,6 +40,7 @@ def hash_log_keys(log):
         "audit-log-arn",
         "base-domain",
         "installer-role-arn",
+        "billing-account",
     ):
         log = re.sub(rf"(--{_key}=[^\s]+)", f"--{_key}={'*' * 5} ", log)
 
@@ -47,16 +49,18 @@ def hash_log_keys(log):
 
 def rosa_login(env, token, aws_region, allowed_commands=None):
     _allowed_commands = allowed_commands or parse_help()
-    if is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region):
+
+    try:
+        is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region, env=env)
         LOGGER.info(f"Already logged in to {env} [region: {aws_region}].")
         return
 
-    build_execute_command(
-        command=f"login --env={env} --token={token}",
-        allowed_commands=_allowed_commands,
-    )
-    if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region):
-        raise NotLoggedInError("Failed to login to AWS.")
+    except NotLoggedInOrWrongEnvError:
+        build_execute_command(
+            command=f"login --env={env} --token={token}",
+            allowed_commands=_allowed_commands,
+        )
+        is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region, env=env)
 
 
 def rosa_logout(allowed_commands=None):
@@ -72,13 +76,20 @@ def change_home_environment():
     os.environ["HOME"] = current_home
 
 
-def is_logged_in(aws_region=None, allowed_commands=None):
+def is_logged_in(env, aws_region=None, allowed_commands=None):
     _allowed_commands = allowed_commands or parse_help()
+
     try:
         res = build_execute_command(command="whoami", aws_region=aws_region, allowed_commands=_allowed_commands)
-        return "User is not logged in to OCM" not in res["err"]
-    except CommandExecuteError:
-        return False
+
+        logged_in_ocm_env = res["out"].get("OCM API")
+        if logged_in_ocm_env != env:
+            raise NotLoggedInOrWrongEnvError(
+                f"User is logged in to OCM in {logged_in_ocm_env} environment and not {env} environment."
+            )
+
+    except CommandExecuteError as ex:
+        raise NotLoggedInOrWrongEnvError(f"Failed to execute 'rosa whoami': {ex}")
 
 
 def execute_command(command, wait_timeout=TIMEOUT_5MIN):
@@ -255,6 +266,9 @@ def execute(
             ocm_env = ocm_client.api_client.configuration.host
             token = ocm_client.api_client.token
 
+        else:
+            ocm_env = OCMPythonClient.get_base_api_uri(api_host=ocm_env)
+
         # If running on openshift-ci we need to change $HOME to /tmp
         if os.environ.get("OPENSHIFT_CI") == "true":
             LOGGER.info("Running in openshift ci")
@@ -276,8 +290,7 @@ def execute(
             )
 
     else:
-        if not is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region):
-            raise NotLoggedInError("Not logged in to OCM, either pass 'token' or log in before running.")
+        is_logged_in(allowed_commands=_allowed_commands, aws_region=aws_region, env=ocm_env)
 
         return build_execute_command(command=command, allowed_commands=_allowed_commands, aws_region=aws_region)
 
