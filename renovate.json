@@ -1,3 +1,1 @@
-{
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json"
-}
+{"$schema": "https://docs.renovatebot.com/renovate-schema.json", "packageRules": [{"matchPackagePatterns": ["redhat-qe-cloud-tools", "python-simple-logger", "python-benedict", "openshift-cluster-management-python-wrapper", "ipdb", "ipython", "pytest"], "groupName": "poetry-deps"}]}
