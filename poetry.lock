@@ -246,18 +246,18 @@ development = ["black", "flake8", "mypy", "pytest", "types-colorama"]
 
 [[package]]
 name = "configparser"
-version = "6.0.0"
+version = "7.0.0"
 description = "Updated configparser from stdlib for earlier Pythons."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "configparser-6.0.0-py3-none-any.whl", hash = "sha256:900ea2bb01b2540b1a644ad3d5351e9b961a4a012d4732f619375fb8f641ee19"},
-    {file = "configparser-6.0.0.tar.gz", hash = "sha256:ec914ab1e56c672de1f5c3483964e68f71b34e457904b7b76e06b922aec067a8"},
+    {file = "configparser-7.0.0-py3-none-any.whl", hash = "sha256:f46d52a12811c637104c6bb8eb33693be0038ab6bf01d69aae009c39ec8c2017"},
+    {file = "configparser-7.0.0.tar.gz", hash = "sha256:af3c618a67aaaedc4d689fd7317d238f566b9aa03cae50102e92d7f0dfe78ba0"},
 ]
 
 [package.extras]
 docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
-testing = ["pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy (>=0.9.1)", "pytest-ruff", "types-backports"]
+testing = ["pytest (>=6,!=8.1.1)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy", "pytest-ruff (>=0.2.1)", "types-backports"]
 
 [[package]]
 name = "decorator"
@@ -741,12 +741,12 @@ urllib3 = ">=1.25.3"
 
 [[package]]
 name = "openshift-cluster-management-python-wrapper"
-version = "1.0.101"
+version = "1.0.102"
 description = "Wrapper around https://github.com/openshift/openshift-cluster-management-python-client"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "openshift_cluster_management_python_wrapper-1.0.101.tar.gz", hash = "sha256:27b124245691966d9f50b7be2e1ee0f4cd947f7d374549c12c823439d138860c"},
+    {file = "openshift_cluster_management_python_wrapper-1.0.102.tar.gz", hash = "sha256:ac9c61a400d8561a0f2cfacc29b97f2585693cf5a0c955fa6fc8637f9b10c935"},
 ]
 
 [package.dependencies]
@@ -1073,12 +1073,12 @@ files = [
 
 [[package]]
 name = "python-simple-logger"
-version = "1.0.20"
+version = "1.0.21"
 description = "A simple logger for python"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "python_simple_logger-1.0.20.tar.gz", hash = "sha256:3bc6958ac7ac5a8e01f3515d94aa3edd5b1ecbc51afeeacf789b6cf06769f9c0"},
+    {file = "python_simple_logger-1.0.21.tar.gz", hash = "sha256:da012d77ab78995efe0fcc180684576758968ffa592bd4730d71ac8abd9aa441"},
 ]
 
 [package.dependencies]
@@ -1163,19 +1163,19 @@ files = [
 
 [[package]]
 name = "redhat-qe-cloud-tools"
-version = "1.0.61"
+version = "1.0.62"
 description = "Python utilities to manage cloud services, such as AWS."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "redhat_qe_cloud_tools-1.0.61.tar.gz", hash = "sha256:e6687c6d465db14e17af8813b05f55f134d4644e773713ad84e7f0f772fef853"},
+    {file = "redhat_qe_cloud_tools-1.0.62.tar.gz", hash = "sha256:7f00d9f8e79ac1c01630df68d88c157904716d1f14313d4c3bb79b1fca938c1a"},
 ]
 
 [package.dependencies]
 boto3 = ">=1.34.18,<2.0.0"
 click = ">=8.1.4,<9.0.0"
 colorlog = ">=6.7.0,<7.0.0"
-configparser = ">=6.0.0,<7.0.0"
+configparser = ">=7.0.0,<8.0.0"
 google-cloud-compute = ">=1.14.1,<2.0.0"
 openshift-python-utilities = ">=5.0.0"
 python-simple-logger = ">=1.0.5"
