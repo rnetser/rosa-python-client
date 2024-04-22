@@ -741,12 +741,12 @@ urllib3 = ">=1.25.3"
 
 [[package]]
 name = "openshift-cluster-management-python-wrapper"
-version = "1.0.102"
+version = "1.0.103"
 description = "Wrapper around https://github.com/openshift/openshift-cluster-management-python-client"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "openshift_cluster_management_python_wrapper-1.0.102.tar.gz", hash = "sha256:ac9c61a400d8561a0f2cfacc29b97f2585693cf5a0c955fa6fc8637f9b10c935"},
+    {file = "openshift_cluster_management_python_wrapper-1.0.103.tar.gz", hash = "sha256:269c4f822c202f3c1f31c3e24248ac3d38e3569ba2ab0f607e6a6d57cce4c0be"},
 ]
 
 [package.dependencies]
@@ -1163,12 +1163,12 @@ files = [
 
 [[package]]
 name = "redhat-qe-cloud-tools"
-version = "1.0.63"
+version = "1.0.64"
 description = "Python utilities to manage cloud services, such as AWS."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "redhat_qe_cloud_tools-1.0.63.tar.gz", hash = "sha256:1a1760a0eb914df68537f4e6356036ecba181b25cfd24cf1dcf5cfb5146ec8b7"},
+    {file = "redhat_qe_cloud_tools-1.0.64.tar.gz", hash = "sha256:f2d0c80fe4a4d8b8396730bdee58856fbeafbf863f40e140ce63bea1bc19736a"},
 ]
 
 [package.dependencies]
